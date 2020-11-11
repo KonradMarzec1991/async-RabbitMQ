@@ -1,3 +1,7 @@
+"""
+Main module with server routing and server run method
+"""
+
 from aiohttp import web
 from api import pair
 

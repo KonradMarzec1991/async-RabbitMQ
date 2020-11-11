@@ -16,9 +16,10 @@ class RabbitFrame:
 
     @property
     def connection(self):
+        """Connection attr getter"""
         return self._connection
 
     @property
     def channel(self):
+        """Channel attr getter"""
         return self._channel
-

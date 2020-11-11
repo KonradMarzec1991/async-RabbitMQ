@@ -1,15 +1,9 @@
-import typing as t
 from aiohttp import web
-
 from model import pair
-
-
-PAIR_VALUES: t.List[pair.Pair] = []
 
 
 class Pair(web.View):
     async def get(self) -> web.Response:
-        global PAIR_VALUES
         return web.json_response(status=200)
 
     async def post(self) -> web.Response:
