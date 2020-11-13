@@ -1,7 +1,9 @@
 """
-Classes for creating RabbitMQ objects
+Classes for creating RabbitMQ objects - it means PairSender and PairReceiver
 """
 import json
+import uuid
+from operator import itemgetter
 import sqlite3
 import pika
 
@@ -36,20 +38,45 @@ class PairSender(RabbitFrame):
     def __init__(self, obj):
         super().__init__()
         self.obj = obj
-        self.channel.queue_declare(queue='pair')
+        self.queue_name = 'save'
+        self.channel.queue_declare(queue=self.queue_name)
 
-    def call(self):
+    def publish(self):
         """
         Sends data object to RabbitMQ queue
         :return: None
         """
         self.channel.basic_publish(
             exchange='',
-            routing_key='pair',
+            routing_key=self.queue_name,
             body=json.dumps(self.obj)
         )
         print(" [x] Sent %r" % self.obj)
         self.connection.close()
+
+
+class BaseReceiver(RabbitFrame):
+
+    def __init__(self):
+        super().__init__()
+        self.channel.queue_declare(queue='retrieve')
+        self.queue_name = 'retrieve'
+
+    def callback(self, ch, method, properties, body):
+        self.data = body
+
+    def consume(self):
+        """
+        Call method turns on listening of consumer for published data
+        :return: None
+        """
+        print(' [*] Waiting for info from monitoring. To exit press CTRL+C')
+        self.channel.basic_consume(
+            queue=self.queue_name,
+            on_message_callback=self.callback,
+            auto_ack=True
+        )
+        self.channel.start_consuming()
 
 
 class PairReceiver(RabbitFrame):
@@ -58,25 +85,110 @@ class PairReceiver(RabbitFrame):
     def __init__(self):
         super().__init__()
         self.channel.queue_declare(queue='pair')
+        self.queue_name = 'save'
+        self.sender = PairSender(None)
 
-    def save_to_db(self, ch, method, properties, body):
-        print(" [x] Received %r" % body)
+    def transform_body(self, ch, method, properties, body):
+        """
+        :param body: json type data sent by api
+        :return: depending on body content
+        1) if `value` key exists in body, user sent POST request to save
+        pair key-value in db (sqlite3)
+        2) if only `key_name` in body content, user sent GET request
+        with key name to retrieve its value. Receiver retrieves given value
+        and creates sender to publish it back
+        """
         body = json.loads(body)
-        key = body['key']
-        value = body['value']
-        with sqlite3.connect(self.DB_PATH) as conn:
-            Pair.save(conn, key, value)
+        if 'value' in body:
+            key, value = itemgetter('key', 'value')(body)
+            with sqlite3.connect(self.DB_PATH) as conn:
+                Pair.save(conn, key, value)
+        else:
+            key = body['key']
+            with sqlite3.connect(self.DB_PATH) as conn:
+                pair = Pair.retrieve(conn, key)
+            print(pair)
+            self.sender.obj = json.dumps({'key': pair[0], 'value': pair[1]})
+            self.sender.queue_name = 'retrieve'
+            self.sender.publish()
 
-    def retrieve_from_db(self, ch, method, properties, body):
-        key = json.loads(body)['key_name']
-        with sqlite3.connect(self.DB_PATH) as conn:
-            Pair.retrieve(conn, key)
-
-    def call(self):
+    def consume(self):
+        """
+        Call method turns on listening of consumer for published data
+        :return: None
+        """
         print(' [*] Waiting for info from monitoring. To exit press CTRL+C')
         self.channel.basic_consume(
-            queue='pair',
-            on_message_callback=self.save_to_db,
+            queue=self.queue_name,
+            on_message_callback=self.transform_body,
             auto_ack=True
         )
+        self.channel.start_consuming()
+
+
+class RPCSender(RabbitFrame):
+
+    def __init__(self):
+        super().__init__()
+        result = self.channel.queue_declare(queue='', exclusive=True)
+        self.callback_queue = result.method.queue
+        self.channel.basic_consume(
+            queue=self.callback_queue,
+            on_message_callback=self.on_response,
+            auto_ack=True)
+
+    def on_response(self, ch, method, props, body):
+        if self.corr_id == props.correlation_id:
+            self.response = body
+
+    def call(self, n):
+        print('from sender', n)
+        self.response = None
+        self.corr_id = str(uuid.uuid4())
+        self.channel.basic_publish(
+            exchange='',
+            routing_key='rpc_queue',
+            properties=pika.BasicProperties(
+                reply_to=self.callback_queue,
+                correlation_id=self.corr_id,
+            ),
+            body=str(n))
+        while self.response is None:
+            print('Jestem w data_events')
+            self.connection.process_data_events()
+        print(self.response)
+        return self.response
+
+
+class RPCReceiver(RabbitFrame):
+    def __init__(self):
+        super().__init__()
+        self.channel.queue_declare(queue='rpc_queue')
+
+    def retrieve_from_db(self, key):
+        with sqlite3.connect(self.DB_PATH) as conn:
+            pair = Pair.retrieve(conn, key)
+        return pair
+
+    def on_request(self, ch, method, props, body):
+        print('From receiver', body)
+        body = json.loads(body)
+
+        response = self.retrieve_from_db(body)
+
+        ch.basic_publish(
+            exchange='',
+            routing_key=props.reply_to,
+            properties=pika.BasicProperties(
+                correlation_id=props.correlation_id),
+            body=str(response))
+        ch.basic_ack(delivery_tag=method.delivery_tag)
+
+    def consume(self):
+        self.channel.basic_qos(prefetch_count=1)
+        self.channel.basic_consume(
+            queue='rpc_queue',
+            on_message_callback=self.on_request
+        )
+        print(" [x] Awaiting RPC requests")
         self.channel.start_consuming()

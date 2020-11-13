@@ -34,5 +34,6 @@ class Pair(pd.BaseModel):
         :return: retrieve first object with given key
         """
         c = conn.cursor()
-        c.execute("SELECT * FROM p pair WHERE p.key = (?) LIMIT 1", key)
+        pair = c.execute("SELECT * FROM pair WHERE key = ?", (key, ))
         conn.commit()
+        return pair.fetchone()
