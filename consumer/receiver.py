@@ -3,13 +3,7 @@ import pika
 import sys
 import json
 from sqlite3 import connect
-
-
-def save(conn, *args):
-    key, value = args
-    c = conn.cursor()
-    c.execute("INSERT INTO pair VALUES(?, ?)", (key, value))
-    conn.commit()
+from model.pair import Pair
 
 
 def main():
@@ -24,8 +18,8 @@ def main():
         body = json.loads(body)
         key = body['key']
         value = body['value']
-        with connect('pair.db') as conn:
-            save(conn, key, value)
+        with connect('/home/konrad/PycharmProjects/async_rabbitMQ/server/pair.db') as conn:
+            Pair.save(conn, key, value)
 
     channel.basic_consume(
         queue='pair',
