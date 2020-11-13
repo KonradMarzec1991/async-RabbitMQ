@@ -1,16 +1,12 @@
 import os
 import sys
-from server.rabbit.rabbitFrame import PairReceiver
-
-
-def main():
-    receiver = PairReceiver()
-    receiver.call()
+from rabbitFrame import PairReceiver
 
 
 if __name__ == '__main__':
     try:
-        main()
+        receiver = PairReceiver()
+        receiver.call()
     except KeyboardInterrupt:
         print('Interrupted')
         try:

@@ -36,10 +36,3 @@ class Pair(pd.BaseModel):
         c = conn.cursor()
         c.execute("SELECT * FROM p pair WHERE p.key = (?) LIMIT 1", key)
         conn.commit()
-
-
-
-
-
-
-

@@ -1,11 +1,11 @@
 from aiohttp import web
-from rabbit import rabbitFrame
+from rabbitFrame import PairSender
 
 
 class Pair(web.View):
     async def post(self) -> web.Response:
         data = await self.request.json()
-        sender = rabbitFrame.PairSender(data)
+        sender = PairSender(data)
         sender.call()
         return web.json_response(text='Body sent successfully', status=201)
 

@@ -2,7 +2,10 @@
 Classes for creating RabbitMQ objects
 """
 import json
+import sqlite3
 import pika
+
+from model import Pair
 
 
 class RabbitFrame:
@@ -47,3 +50,33 @@ class PairSender(RabbitFrame):
         )
         print(" [x] Sent %r" % self.obj)
         self.connection.close()
+
+
+class PairReceiver(RabbitFrame):
+    DB_PATH = 'pair.db'
+
+    def __init__(self):
+        super().__init__()
+        self.channel.queue_declare(queue='pair')
+
+    def save_to_db(self, ch, method, properties, body):
+        print(" [x] Received %r" % body)
+        body = json.loads(body)
+        key = body['key']
+        value = body['value']
+        with sqlite3.connect(self.DB_PATH) as conn:
+            Pair.save(conn, key, value)
+
+    def retrieve_from_db(self, ch, method, properties, body):
+        key = json.loads(body)['key_name']
+        with sqlite3.connect(self.DB_PATH) as conn:
+            Pair.retrieve(conn, key)
+
+    def call(self):
+        print(' [*] Waiting for info from monitoring. To exit press CTRL+C')
+        self.channel.basic_consume(
+            queue='pair',
+            on_message_callback=self.save_to_db,
+            auto_ack=True
+        )
+        self.channel.start_consuming()
