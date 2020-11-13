@@ -142,7 +142,6 @@ class RPCSender(RabbitFrame):
             self.response = body
 
     def call(self, n):
-        print('from sender', n)
         self.response = None
         self.corr_id = str(uuid.uuid4())
         self.channel.basic_publish(
@@ -154,10 +153,8 @@ class RPCSender(RabbitFrame):
             ),
             body=str(n))
         while self.response is None:
-            print('Jestem w data_events')
             self.connection.process_data_events()
-        print(self.response)
-        return self.response
+        return int(self.response)
 
 
 class RPCReceiver(RabbitFrame):
@@ -165,16 +162,18 @@ class RPCReceiver(RabbitFrame):
         super().__init__()
         self.channel.queue_declare(queue='rpc_queue')
 
-    def retrieve_from_db(self, key):
-        with sqlite3.connect(self.DB_PATH) as conn:
-            pair = Pair.retrieve(conn, key)
-        return pair
+    def fib(self, n):
+        if n == 0:
+            return 0
+        elif n == 1:
+            return 1
+        else:
+            return self.fib(n - 1) + self.fib(n - 2)
 
     def on_request(self, ch, method, props, body):
-        print('From receiver', body)
-        body = json.loads(body)
-
-        response = self.retrieve_from_db(body)
+        n = int(body)
+        print(" [.] fib(%s)" % n)
+        response = self.fib(n)
 
         ch.basic_publish(
             exchange='',

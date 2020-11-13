@@ -23,7 +23,7 @@ class Pair(web.View):
 
 class PairGet(web.View):
     async def get(self) -> web.Response:
-        key = self.request.match_info['key_name']
+        key = int(self.request.match_info['key_name'])
         print(key)
         sender = RPCSender()
         response = sender.call(key)
