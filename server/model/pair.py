@@ -4,6 +4,7 @@ Base classes for creating objects and sending data to RabbitMQ
 
 import json
 import pydantic as pd
+from asyncpg import pool
 from rabbit.rabbitFrame import RabbitFrame
 
 
@@ -19,6 +20,22 @@ class Pair(pd.BaseModel):
 
     def __str__(self):
         return repr(self)
+
+
+def save(
+    db_pool: pool.Pool,
+    key: str,
+    value: float
+) -> Pair:
+    db_pool.execute(
+        "INSERT INTO pair(key, value) values ($1, $2)",
+        key,
+        value
+    )
+    return Pair(
+        key=key,
+        value=value
+    )
 
 
 class PairSender(RabbitFrame):
