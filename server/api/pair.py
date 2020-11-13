@@ -1,5 +1,5 @@
 from aiohttp import web
-from model import pair
+from rabbit import rabbitFrame
 
 
 class Pair(web.View):
@@ -9,7 +9,7 @@ class Pair(web.View):
     async def post(self) -> web.Response:
 
         data = await self.request.json()
-        sender = pair.PairSender(data)
+        sender = rabbitFrame.PairSender(data)
         sender.call()
 
         return web.json_response(text='Udało sie')

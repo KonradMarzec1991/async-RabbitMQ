@@ -1,6 +1,15 @@
 import os
 import pika
 import sys
+import json
+from sqlite3 import connect
+
+
+def save(conn, *args):
+    key, value = args
+    c = conn.cursor()
+    c.execute("INSERT INTO pair VALUES(?, ?)", (key, value))
+    conn.commit()
 
 
 def main():
@@ -8,11 +17,15 @@ def main():
         pika.ConnectionParameters(host='localhost')
     )
     channel = connection.channel()
-
     channel.queue_declare(queue='pair')
 
     def callback(ch, method, properties, body):
         print(" [x] Received %r" % body)
+        body = json.loads(body)
+        key = body['key']
+        value = body['value']
+        with connect('pair.db') as conn:
+            save(conn, key, value)
 
     channel.basic_consume(
         queue='pair',
