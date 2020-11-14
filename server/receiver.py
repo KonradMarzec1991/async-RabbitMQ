@@ -4,6 +4,8 @@ Receivers are loaded with Celery worker:
 1) PairReceiver is dedicated for saving in db
 2) RPCReceiver is dedicated for retrieving from db
 """
+import logging
+
 from celery import Celery
 
 from setup import settings
@@ -42,6 +44,7 @@ def main():
     """
     save_receiver.delay()
     retrieve_receiver.delay()
+    logging.debug('Receivers initialized successfully')
 
 
 if __name__ == '__main__':

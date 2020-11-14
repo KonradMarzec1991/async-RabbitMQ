@@ -37,4 +37,5 @@ venv.bak/
 .idea/
 .idea
 
-pair.db
+server/pair.db
+logs/
