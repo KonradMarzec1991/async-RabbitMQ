@@ -4,13 +4,10 @@ Receivers are loaded with Celery worker:
 1) PairReceiver is dedicated for saving in db
 2) RPCReceiver is dedicated for retrieving from db
 """
-
 from celery import Celery
 
-from rabbitFrame import (
-    PairReceiver,
-    RPCReceiver
-)
+from rabbitFrame import BaseReceiver
+from rpc_models import RPCReceiver
 
 
 app = Celery(
@@ -25,7 +22,7 @@ def save_receiver():
     """
     Create `PairReceiver` instance and consume
     """
-    receiver = PairReceiver()
+    receiver = BaseReceiver()
     receiver.consume()
 
 
