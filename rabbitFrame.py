@@ -2,10 +2,10 @@
 Classes for creating RabbitMQ objects - it means PairSender and PairReceiver
 """
 import json
-import uuid
 from operator import itemgetter
 import sqlite3
 import pika
+import settings
 
 from model import Pair
 
@@ -56,7 +56,6 @@ class BaseSender(RabbitFrame):
 
 
 class BaseReceiver(RabbitFrame):
-    DB_PATH = 'pair.db'
 
     def __init__(self):
         super().__init__()
@@ -71,7 +70,7 @@ class BaseReceiver(RabbitFrame):
         """
         body = json.loads(body)
         key, value = itemgetter('key', 'value')(body)
-        with sqlite3.connect(self.DB_PATH) as conn:
+        with sqlite3.connect(settings.DB_NAME) as conn:
             Pair.save(conn, key, value)
 
     def consume(self):

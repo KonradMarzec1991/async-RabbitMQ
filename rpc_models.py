@@ -4,6 +4,7 @@ import sqlite3
 import pika
 
 from model import Pair
+import settings
 
 
 class RPCSender(RabbitFrame):
@@ -41,14 +42,13 @@ class RPCSender(RabbitFrame):
 
 
 class RPCReceiver(RabbitFrame):
-    DB_PATH = 'pair.db'
 
     def __init__(self):
         super().__init__()
         self.channel.queue_declare(queue='rpc_queue')
 
     def retrieve_from_db(self, body):
-        with sqlite3.connect(self.DB_PATH) as conn:
+        with sqlite3.connect(settings.DB_NAME) as conn:
             pair = Pair.retrieve(conn, body.decode('utf-8'))
         return pair
 
@@ -58,7 +58,8 @@ class RPCReceiver(RabbitFrame):
             exchange='',
             routing_key=props.reply_to,
             properties=pika.BasicProperties(
-                correlation_id=props.correlation_id),
+                correlation_id=props.correlation_id
+            ),
             body=str(response))
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
