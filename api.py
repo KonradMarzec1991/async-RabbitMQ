@@ -26,11 +26,8 @@ class Pair(web.View):
 class PairGet(web.View):
     async def get(self) -> web.Response:
         key = self.request.match_info['key_name']
-        print(key)
         sender = RPCSender()
         response = sender.call(key)
-        print(response)
-
         return web.json_response(
             text=json.dumps(response.decode('utf-8')),
             status=200

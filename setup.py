@@ -1,7 +1,18 @@
+"""
+Module with database setup scripts
+"""
 import sqlite3
 
 
 def init_db():
+    """
+    Function creates:
+    1) Connection to database (in our example it is `pair.db`)
+    2) Table for key-value pairs
+    3) Example record with key: first and value: 1
+    If table exists, script catches sqlite3 exception and breaks code
+    :return: None
+    """
     conn = sqlite3.connect('pair.db')
     cursor = conn.cursor()
 
