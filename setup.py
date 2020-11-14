@@ -2,6 +2,7 @@
 Module with database setup scripts
 """
 import sqlite3
+import settings
 
 
 def init_db():
@@ -13,7 +14,7 @@ def init_db():
     If table exists, script catches sqlite3 exception and breaks code
     :return: None
     """
-    conn = sqlite3.connect('pair.db')
+    conn = sqlite3.connect(settings.DB_NAME)
     cursor = conn.cursor()
 
     try:

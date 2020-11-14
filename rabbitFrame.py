@@ -51,7 +51,6 @@ class BaseSender(RabbitFrame):
             routing_key=self.queue_name,
             body=json.dumps(self.obj)
         )
-        print(" [x] Sent %r" % self.obj)
         self.connection.close()
 
 

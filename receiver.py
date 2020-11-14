@@ -6,14 +6,15 @@ Receivers are loaded with Celery worker:
 """
 from celery import Celery
 
+import settings
 from rabbitFrame import BaseReceiver
 from rpc_models import RPCReceiver
 
 
 app = Celery(
-    'receiver',
-    backend='rpc://',
-    broker='pyamqp://guest@localhost//'
+    settings.CELERY_NAME,
+    backend=settings.CELERY_BACKEND,
+    broker=settings.CELERY_BROKER
 )
 
 

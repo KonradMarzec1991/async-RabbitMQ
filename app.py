@@ -3,17 +3,14 @@ Main module with server routing and server-run method
 """
 from aiohttp import web
 import setup
-from api import (
-    PairGet,
-    PairPost
-)
+from urls import add_urls
+
 
 # Initialize web application
 app = web.Application()
 
 # Add routes for GET/POST requests
-app.router.add_get('/pair/{key_name:[0-9A-Za-z]+}', PairGet)
-app.router.add_view('/pair/', PairPost)
+add_urls(app)
 
 # Create/connect database
 setup.init_db()
