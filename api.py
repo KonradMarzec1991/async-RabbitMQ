@@ -1,3 +1,5 @@
+import json
+
 from aiohttp import web
 from rabbitFrame import PairSender, RPCSender
 
@@ -8,7 +10,7 @@ class Pair(web.View):
         sender = PairSender(data)
         sender.publish()
         return web.json_response(
-            text='Body sent successfully',
+            text='Data body sent successfully',
             status=201
         )
 
@@ -23,13 +25,13 @@ class Pair(web.View):
 
 class PairGet(web.View):
     async def get(self) -> web.Response:
-        key = int(self.request.match_info['key_name'])
+        key = self.request.match_info['key_name']
         print(key)
         sender = RPCSender()
         response = sender.call(key)
         print(response)
 
         return web.json_response(
-            text=f'{response}',
+            text=json.dumps(response.decode('utf-8')),
             status=200
         )

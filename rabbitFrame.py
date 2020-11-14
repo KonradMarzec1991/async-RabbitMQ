@@ -88,29 +88,16 @@ class PairReceiver(RabbitFrame):
         self.queue_name = 'save'
         self.sender = PairSender(None)
 
-    def transform_body(self, ch, method, properties, body):
+    def save_to_db(self, ch, method, properties, body):
         """
+        Method saves in db key-value pair
         :param body: json type data sent by api
-        :return: depending on body content
-        1) if `value` key exists in body, user sent POST request to save
-        pair key-value in db (sqlite3)
-        2) if only `key_name` in body content, user sent GET request
-        with key name to retrieve its value. Receiver retrieves given value
-        and creates sender to publish it back
+        :return: None
         """
         body = json.loads(body)
-        if 'value' in body:
-            key, value = itemgetter('key', 'value')(body)
-            with sqlite3.connect(self.DB_PATH) as conn:
-                Pair.save(conn, key, value)
-        else:
-            key = body['key']
-            with sqlite3.connect(self.DB_PATH) as conn:
-                pair = Pair.retrieve(conn, key)
-            print(pair)
-            self.sender.obj = json.dumps({'key': pair[0], 'value': pair[1]})
-            self.sender.queue_name = 'retrieve'
-            self.sender.publish()
+        key, value = itemgetter('key', 'value')(body)
+        with sqlite3.connect(self.DB_PATH) as conn:
+            Pair.save(conn, key, value)
 
     def consume(self):
         """
@@ -141,7 +128,7 @@ class RPCSender(RabbitFrame):
         if self.corr_id == props.correlation_id:
             self.response = body
 
-    def call(self, n):
+    def call(self, key):
         self.response = None
         self.corr_id = str(uuid.uuid4())
         self.channel.basic_publish(
@@ -151,30 +138,28 @@ class RPCSender(RabbitFrame):
                 reply_to=self.callback_queue,
                 correlation_id=self.corr_id,
             ),
-            body=str(n))
+            body=key)
         while self.response is None:
             self.connection.process_data_events()
-        return int(self.response)
+        return self.response
 
 
 class RPCReceiver(RabbitFrame):
+    DB_PATH = 'pair.db'
+
     def __init__(self):
         super().__init__()
         self.channel.queue_declare(queue='rpc_queue')
 
-    def fib(self, n):
-        if n == 0:
-            return 0
-        elif n == 1:
-            return 1
-        else:
-            return self.fib(n - 1) + self.fib(n - 2)
+    def retrieve_from_db(self, body):
+        with sqlite3.connect(self.DB_PATH) as conn:
+            pair = Pair.retrieve(conn, body.decode('utf-8'))
+        return pair
 
     def on_request(self, ch, method, props, body):
-        n = int(body)
-        print(" [.] fib(%s)" % n)
-        response = self.fib(n)
-
+        print('body', body)
+        response = self.retrieve_from_db(body)
+        print('response', response)
         ch.basic_publish(
             exchange='',
             routing_key=props.reply_to,

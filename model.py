@@ -36,4 +36,8 @@ class Pair(pd.BaseModel):
         c = conn.cursor()
         pair = c.execute("SELECT * FROM pair WHERE key = ?", (key, ))
         conn.commit()
-        return pair.fetchone()
+        try:
+            key, value = pair.fetchone()
+            return dict(key=key, value=value)
+        except TypeError:
+            return 'Data with given key does not exist'
