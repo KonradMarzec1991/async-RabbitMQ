@@ -2,7 +2,7 @@
 Module with database setup scripts
 """
 import sqlite3
-import settings
+from setup import settings
 
 
 def init_db():

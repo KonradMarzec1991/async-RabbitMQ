@@ -1,10 +1,10 @@
-from rabbitFrame import RabbitFrame
+from rabbit_mq.rabbitFrame import RabbitFrame
 import uuid
 import sqlite3
 import pika
 
-from model import Pair
-import settings
+from db.model import Pair
+from setup import settings
 
 
 class RPCSender(RabbitFrame):

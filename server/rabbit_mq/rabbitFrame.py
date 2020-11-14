@@ -5,9 +5,9 @@ import json
 from operator import itemgetter
 import sqlite3
 import pika
-import settings
+from setup import settings
 
-from model import Pair
+from db.model import Pair
 
 
 class RabbitFrame:

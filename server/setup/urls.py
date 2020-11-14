@@ -1,4 +1,4 @@
-from api import (
+from api.api import (
     PairGet,
     PairPost
 )

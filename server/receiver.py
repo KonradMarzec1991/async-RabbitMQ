@@ -6,9 +6,9 @@ Receivers are loaded with Celery worker:
 """
 from celery import Celery
 
-import settings
-from rabbitFrame import BaseReceiver
-from rpc_models import RPCReceiver
+from setup import settings
+from rabbit_mq.rabbitFrame import BaseReceiver
+from rabbit_mq.rpc_models import RPCReceiver
 
 
 app = Celery(
