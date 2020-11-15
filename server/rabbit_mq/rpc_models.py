@@ -60,11 +60,7 @@ class RPCReceiver(RabbitFrame):
 
     @staticmethod
     def retrieve_from_db(body):
-        """
-        Retrieves from db pair key-value having given key
-        :param body: key_name
-        :return: tuple with key/value
-        """
+        """Retrieves from db key/value pair for given key"""
         with sqlite3.connect(settings.DB_NAME) as conn:
             pair = Pair.retrieve(conn, body.decode('utf-8'))
         return pair

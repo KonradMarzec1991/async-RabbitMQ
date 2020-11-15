@@ -35,4 +35,4 @@ db.init_db()
 logging.debug('Database initialized successfully')
 
 # Run application
-web.run_app(app)
+web.run_app(app, port=8000)

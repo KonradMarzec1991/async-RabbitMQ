@@ -23,7 +23,9 @@ def init_db():
             key VARCHAR(100) NOT NULL,
             value REAL NOT NULL
         )""")
+
         cursor.execute("""INSERT INTO pair VALUES ('first', 1)""")
+        cursor.execute("""INSERT INTO pair VALUES ('second', 2)""")
     except sqlite3.OperationalError:
         return
 

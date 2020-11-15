@@ -17,7 +17,7 @@ class RabbitFrame:
     """
     def __init__(self):
         self._connection = pika.BlockingConnection(
-            pika.ConnectionParameters('localhost')
+            pika.ConnectionParameters('rabbitmq')
         )
         self._channel = self.connection.channel()
 
@@ -39,8 +39,8 @@ class BaseSender(RabbitFrame):
     def __init__(self, obj):
         super().__init__()
         self.obj = obj
-        self.queue_name = 'save'
-        self.channel.queue_declare(queue=self.queue_name)
+        # self.queue_name = 'save'
+        # self.channel.queue_declare(queue='saver')
 
     def publish(self):
         """
@@ -49,7 +49,7 @@ class BaseSender(RabbitFrame):
         """
         self.channel.basic_publish(
             exchange='',
-            routing_key=self.queue_name,
+            routing_key='saver',
             body=json.dumps(self.obj)
         )
         self.connection.close()
@@ -61,11 +61,12 @@ class BaseReceiver(RabbitFrame):
     """
     def __init__(self):
         super().__init__()
-        self.channel.queue_declare(queue='pair')
-        self.queue_name = 'save'
+        # self.channel.queue_declare(queue='pair')
+        self.channel.queue_declare(queue='saver')
+        self.queue_name = 'saver'
 
-    # pylint: disable=attribute-defined-outside-init,unused-argument
     @staticmethod
+    # pylint: disable=attribute-defined-outside-init,unused-argument
     def save_to_db(ch, method, properties, body):
         """
         Method saves in db key-value pair
@@ -83,7 +84,7 @@ class BaseReceiver(RabbitFrame):
         :return: None
         """
         self.channel.basic_consume(
-            queue=self.queue_name,
+            queue='saver',
             on_message_callback=self.save_to_db,
             auto_ack=True
         )
