@@ -25,7 +25,8 @@ With initialization of database `sqlite3` some records are loaded. You can retri
 Below screenshots shows how to use correctly application (I used here `Postman`).
 
 1) Retrieving data from database
-![Alt text](/home/konrad/Obrazy/first.png)
+![first](https://user-images.githubusercontent.com/33575891/99188555-ca556280-275c-11eb-929b-606f8060cc8e.png)
+
 
 2) Saving data to database
 ![Alt text](/home/konrad/Obrazy/twelve.png)
