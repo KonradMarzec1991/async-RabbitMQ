@@ -1,3 +1,4 @@
+# pylint: disable=import-error
 """
 Module with database setup scripts
 """
@@ -27,4 +28,3 @@ def init_db():
         return
 
     conn.commit()
-    print('DB initialized')

@@ -1,3 +1,4 @@
+# pylint: disable=import-error
 """
 API module contains two controllers for GET/POST web methods
 """
@@ -16,6 +17,11 @@ class PairGet(web.View):
     - gets server response and display it
     """
     async def get(self) -> web.Response:
+        """
+        Sends key_name to receiver, receiver retrieves data from db and
+        publish it back to sender
+        :return: json response with data information
+        """
         key = self.request.match_info['key_name']
         sender = RPCSender()
         response = sender.call(key)
@@ -32,6 +38,10 @@ class PairPost(web.View):
     - display json response with 201 if data sent correctly
     """
     async def post(self) -> web.Response:
+        """
+        Sends key-value data to receiver, receiver consumes it and save in db
+        :return: json response
+        """
         data = await self.request.json()
         sender = BaseSender(data)
         sender.publish()

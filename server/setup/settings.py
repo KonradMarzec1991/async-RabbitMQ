@@ -1,3 +1,7 @@
+"""
+Module contains project variables
+"""
+
 DB_NAME = 'pair.db'
 
 CELERY_NAME = 'receiver'

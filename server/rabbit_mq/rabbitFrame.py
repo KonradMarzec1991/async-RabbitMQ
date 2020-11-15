@@ -1,3 +1,4 @@
+# pylint: disable=import-error,invalid-name
 """
 Classes for creating RabbitMQ objects - it means PairSender and PairReceiver
 """
@@ -33,7 +34,7 @@ class RabbitFrame:
 
 class BaseSender(RabbitFrame):
     """
-    PairSender class deliver method for publishing data to RabbitMQ
+    BaseSender class deliver method for publishing data to RabbitMQ
     """
     def __init__(self, obj):
         super().__init__()
@@ -55,13 +56,17 @@ class BaseSender(RabbitFrame):
 
 
 class BaseReceiver(RabbitFrame):
-
+    """
+    BaseReceiver class consumes published data
+    """
     def __init__(self):
         super().__init__()
         self.channel.queue_declare(queue='pair')
         self.queue_name = 'save'
 
-    def save_to_db(self, ch, method, properties, body):
+    # pylint: disable=attribute-defined-outside-init,unused-argument
+    @staticmethod
+    def save_to_db(ch, method, properties, body):
         """
         Method saves in db key-value pair
         :param body: json type data sent by api

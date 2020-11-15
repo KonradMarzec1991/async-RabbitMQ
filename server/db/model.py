@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 """
 Base classes wit Pair model and database functions
 """
@@ -22,8 +23,8 @@ class Pair(pd.BaseModel):
         :return: save in db key/value pair
         """
         key, value = args
-        c = conn.cursor()
-        c.execute("INSERT INTO pair VALUES(?, ?)", (key, value))
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO pair VALUES(?, ?)", (key, value))
         conn.commit()
 
     @staticmethod
@@ -33,8 +34,8 @@ class Pair(pd.BaseModel):
         :param key: key of searched pair
         :return: retrieve first object with given key
         """
-        c = conn.cursor()
-        pair = c.execute("SELECT * FROM pair WHERE key = ?", (key, ))
+        cursor = conn.cursor()
+        pair = cursor.execute("SELECT * FROM pair WHERE key = ?", (key, ))
         conn.commit()
         try:
             key, value = pair.fetchone()
