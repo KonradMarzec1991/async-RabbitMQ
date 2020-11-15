@@ -39,8 +39,6 @@ class BaseSender(RabbitFrame):
     def __init__(self, obj):
         super().__init__()
         self.obj = obj
-        # self.queue_name = 'save'
-        # self.channel.queue_declare(queue='saver')
 
     def publish(self):
         """
@@ -61,7 +59,6 @@ class BaseReceiver(RabbitFrame):
     """
     def __init__(self):
         super().__init__()
-        # self.channel.queue_declare(queue='pair')
         self.channel.queue_declare(queue='saver')
         self.queue_name = 'saver'
 
