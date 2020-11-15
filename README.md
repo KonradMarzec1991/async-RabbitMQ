@@ -1,0 +1,37 @@
+## Asynchronous RabbitMQ 
+
+### Description
+Mini project accomplishing connection between asynchronous API, 
+RabbitMQ queue and server with database access. Project contains of:
+1) Async API with `GET/POST` methods for sending saving/retrieving task
+2) RabbitMQ container which queues task and send them to receivers
+3) Receivers get key/data and retrieve it from database or save it
+
+### Stack
+Project was pursued with technologies: `aiohttp`, `pika`, `pydantic`, `celery`.
+
+### Installation
+Please follow steps:
+1) `git clone https://github.com/KonradMarzec1991/async-RabbitMQ.git`
+2) `docker-compose up --build` <br />
+
+Docker loads all required dependencies and starts application on port `8000`. <br />
+Please ensure that local instance of `RabbitMQ` is not working. If it so, use: <br />
+`sudo service rabbitmq-server stop` <br />
+to stop local process.
+
+### Testing
+With initialization of database `sqlite3` some records are loaded. You can retrieve record `first` without saving it.
+Below screenshots shows how to use correctly application (I used here `Postman`).
+
+1) Retrieving data from database
+![Alt text](/home/konrad/Obrazy/first.png)
+
+2) Saving data to database
+![Alt text](/home/konrad/Obrazy/twelve.png)
+
+3) Retrieving already saved data
+![Alt text](/home/konrad/Obrazy/twelve_retrieve.png)
+
+4) Retrieving from database record that does not exist
+![Alt text](/home/konrad/Obrazy/wrong.png)
