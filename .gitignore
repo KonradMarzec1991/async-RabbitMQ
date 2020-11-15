@@ -8,6 +8,8 @@ sdist/
 var/
 wheels/
 __pycache__/
+__pycache__/*
+__pycache__
 
 # Unit test / coverage reports
 htmlcov/
