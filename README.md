@@ -29,10 +29,10 @@ Below screenshots shows how to use correctly application (I used here `Postman`)
 
 
 2) Saving data to database
-![Alt text](/home/konrad/Obrazy/twelve.png)
+![twelve](https://user-images.githubusercontent.com/33575891/99188602-04266900-275d-11eb-9315-44ffddc30546.png)
 
 3) Retrieving already saved data
-![Alt text](/home/konrad/Obrazy/twelve_retrieve.png)
+![twelve_retrieve](https://user-images.githubusercontent.com/33575891/99188607-08528680-275d-11eb-9a78-104a219408b2.png)
 
 4) Retrieving from database record that does not exist
-![Alt text](/home/konrad/Obrazy/wrong.png)
+![wrong](https://user-images.githubusercontent.com/33575891/99188608-0be60d80-275d-11eb-98e5-041b90344acc.png)
